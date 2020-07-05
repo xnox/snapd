@@ -11,7 +11,7 @@ description: |
 adopt-info: snapd-deb
 # build-base is needed here for snapcraft to build this snap as with "modern"
 # snapcraft
-build-base: core20
+build-base: core
 grade: stable
 license: GPL-3.0
 
@@ -29,6 +29,8 @@ parts:
   snapd-deb:
     plugin: nil
     source: .
+    build-snaps:
+      - try: [go/1.10/stable]
     override-pull: |
       snapcraftctl pull
       # install build dependencies
@@ -98,11 +100,12 @@ parts:
     override-stage: |
       snapcraftctl stage
       # fix symlinks of ld.so to be relative
-      if [ "$(readlink -f lib64/ld-linux-x86-64.so.2)" = "/lib/x86_64-linux-gnu/ld-2.31.so" ]; then
-          ln -f -s ../lib/x86_64-linux-gnu/ld-2.31.so lib64/ld-linux-x86-64.so.2
+      ver=$(ldconfig -V | sed 's/.* //')
+      if [ "$(readlink -f lib64/ld-linux-x86-64.so.2)" = "/lib/x86_64-linux-gnu/ld-$(ver).so" ]; then
+          ln -f -s ../lib/x86_64-linux-gnu/ld-$(ver).so lib64/ld-linux-x86-64.so.2
       fi
-      if [ "$(readlink -f lib64/ld64.so.2)" = "/lib/powerpc64le-linux-gnu/ld-2.31.so" ]; then
-          ln -f -s ../lib/powerpc64le-linux-gnu/ld-2.31.so lib64/ld64.so.2
+      if [ "$(readlink -f lib64/ld64.so.2)" = "/lib/powerpc64le-linux-gnu/ld-$(ver).so" ]; then
+          ln -f -s ../lib/powerpc64le-linux-gnu/ld-$(ver).so lib64/ld64.so.2
       fi
   # the version in Ubuntu 16.04 (cache v6)
   fontconfig-xenial:
